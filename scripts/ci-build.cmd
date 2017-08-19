@@ -18,7 +18,7 @@ rem Set the request Visual Studio Version
 if not [x%PLATFORM:2015=%]==[x%PLATFORM%] ( 
     set vs_generator=Visual Studio 14 2015 
 ) else ( 
-    set vs_generator=Visual Studio 15 2017 )
+    set vs_generator=Visual Studio 15 2017
 )
 
 rem Check if the platform variable contains x64
