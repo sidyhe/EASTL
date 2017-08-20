@@ -3,13 +3,13 @@ version: 1.0.{build}
 environment:
     matrix:
         - platform: MSVC_2015_x86
-            image: Visual Studio 2015
+            - image: Visual Studio 2015
         - platform: MSVC_2015_x64
-            image: Visual Studio 2015
+            - image: Visual Studio 2015
         - platform:  MSVC_2017_x86
-            image: Visual Studio 2017
+            - image: Visual Studio 2017
         - platform:  MSVC_2017_x64
-            image: Visual Studio 2017
+            - image: Visual Studio 2017
 install:
     - scripts\ci-pre.cmd
 
