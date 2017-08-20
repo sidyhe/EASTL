@@ -1,12 +1,13 @@
 version: 1.0.{build}
 
-image:
-    - Visual Studio 2015
-        - platform:
-            - MSVC_2015_x86
-            - MSVC_2015_x64
-    - Visual Studio 2017
-        - platform:
+environment:
+    matrix:
+        image: Visual Studio 2015
+        platform:
+             - MSVC_2015_x86
+             - MSVC_2015_x64
+        image: Visual Studio 2017
+        platform: 
             - MSVC_2017_x86
             - MSVC_2017_x64
 
