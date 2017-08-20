@@ -3,8 +3,8 @@ version: 1.0.{build}
 environment:
     matrix:
         - image: Visual Studio 2015
-            - platform: MSVC_2015_x86
-            - platform: MSVC_2015_x64
+            platform: MSVC_2015_x86
+            platform: MSVC_2015_x64
         - image: Visual Studio 2017
             platform: 
                 - MSVC_2017_x86
