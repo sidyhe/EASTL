@@ -1,9 +1,9 @@
 version: 1.0.{build}
 platform: 
-    # - MSVC_2015_x86
-    # - MSVC_2015_x64
-    - MSVC_2017_x86
-    - MSVC_2017_x64
+    - MSVC_2015_X86
+    - MSVC_2015_X64
+    # - MSVC_2017_x86
+    # - MSVC_2017_x64
 install:
     - scripts\ci-pre.cmd
 build_script:
