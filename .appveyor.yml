@@ -1,4 +1,5 @@
 version: 1.0.{build}
+image: Visual Studio 2015
 platform: 
     - MSVC_2015_x86
     - MSVC_2015_x64
