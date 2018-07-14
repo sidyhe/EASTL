@@ -49,15 +49,17 @@
 		extern "C" long  __stdcall _InterlockedCompareExchange(long volatile* Dest, long Exchange, long Comp);
 		#pragma intrinsic (_InterlockedCompareExchange)
 	#else
-		extern "C" long  _InterlockedIncrement(long volatile* Addend);
+		extern "C" long __cdecl _InterlockedIncrement(long volatile* Addend);
 		#pragma intrinsic (_InterlockedIncrement)
 
-		extern "C" long _InterlockedDecrement(long volatile* Addend);
+		extern "C" long __cdecl _InterlockedDecrement(long volatile* Addend);
 		#pragma intrinsic (_InterlockedDecrement)
 
-		extern "C" long _InterlockedCompareExchange(long volatile* Dest, long Exchange, long Comp);
+		extern "C" long __cdecl _InterlockedCompareExchange(long volatile* Dest, long Exchange, long Comp);
 		#pragma intrinsic (_InterlockedCompareExchange)
 	#endif
+		struct _KMUTANT;
+		typedef _KMUTANT KMUTANT, *PKMUTANT, *PRKMUTANT, KMUTEX, *PKMUTEX, *PRKMUTEX;
 #endif
 
 
@@ -187,11 +189,7 @@ namespace eastl
 
 			protected:
 				#if defined(EA_PLATFORM_MICROSOFT)
-					#if defined(_WIN64)
-						uint64_t mMutexBuffer[40 / sizeof(uint64_t)]; // CRITICAL_SECTION is 40 bytes on Win64.
-					#elif defined(_WIN32)
-						uint32_t mMutexBuffer[24 / sizeof(uint32_t)]; // CRITICAL_SECTION is 24 bytes on Win32.
-					#endif
+					PRKMUTEX mMutex;
 				#elif defined(EA_PLATFORM_POSIX)
 					pthread_mutex_t mMutex;
 				#endif

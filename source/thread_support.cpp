@@ -13,7 +13,7 @@
 	#ifndef WIN32_LEAN_AND_MEAN
 		#define WIN32_LEAN_AND_MEAN
 	#endif
-	#include <Windows.h>
+	#include <ntddk.h>
 	#pragma warning(pop)    
 #endif
 
@@ -31,58 +31,57 @@ namespace eastl
 
 			mutex::mutex()
 			{
-				#if defined(EA_PLATFORM_MICROSOFT)
-					static_assert(sizeof(mMutexBuffer) == sizeof(CRITICAL_SECTION), "mMutexBuffer size failure");
-					//static_assert(EA_ALIGN_OF(mMutexBuffer) >= EA_ALIGN_OF(CRITICAL_SECTION), "mMutexBuffer alignment failure"); // Enabling this causes the VS2012 compiler to crash.
-
-					#if !defined(_WIN32_WINNT) || (_WIN32_WINNT < 0x0403)
-						InitializeCriticalSection((CRITICAL_SECTION*)mMutexBuffer);
-					#elif !EA_WINAPI_FAMILY_PARTITION(EA_WINAPI_PARTITION_DESKTOP)
-						BOOL result = InitializeCriticalSectionEx((CRITICAL_SECTION*)mMutexBuffer, 10, 0);
-						EASTL_ASSERT(result != 0); EA_UNUSED(result);
-					#else
-						BOOL result = InitializeCriticalSectionAndSpinCount((CRITICAL_SECTION*)mMutexBuffer, 10);
-						EASTL_ASSERT(result != 0); EA_UNUSED(result);
-					#endif
-
-				#elif defined(EA_PLATFORM_POSIX)
-					pthread_mutexattr_t attr;
-
-					pthread_mutexattr_init(&attr);
-					pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_PRIVATE); 
-					pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-					pthread_mutex_init(&mMutex, &attr);
-					pthread_mutexattr_destroy(&attr);
-				#endif
+				mMutex = new KMUTEX;
+				KeInitializeMutex(mMutex, 0);
 			}
 
 			mutex::~mutex()
 			{
-				#if defined(EA_PLATFORM_MICROSOFT)
-					DeleteCriticalSection((CRITICAL_SECTION*)mMutexBuffer);
-				#elif defined(EA_PLATFORM_POSIX)
-					pthread_mutex_destroy(&mMutex);
-				#endif
+				delete mMutex;
 			}
 
 			void mutex::lock()
 			{
-				#if defined(EA_PLATFORM_MICROSOFT)
-					EnterCriticalSection((CRITICAL_SECTION*)mMutexBuffer);
-				#elif defined(EA_PLATFORM_POSIX)
-					pthread_mutex_lock(&mMutex);
-				#else
-					EASTL_FAIL_MSG("EASTL thread safety is not implemented yet. See EAThread for how to do this for the given platform.");
-				#endif
+				NTSTATUS st;
+				KIRQL kIrql = KeGetCurrentIrql();
+
+				if (kIrql < DISPATCH_LEVEL)
+				{
+					st = KeWaitForSingleObject(mMutex, Executive, KernelMode, FALSE, NULL);
+					if (!NT_SUCCESS(st))
+						ExRaiseStatus(st);
+				}
+				else if (kIrql == DISPATCH_LEVEL)
+				{
+					LARGE_INTEGER Timeout;
+
+					Timeout.QuadPart = 0;
+					do 
+					{
+						st = KeWaitForSingleObject(mMutex, Executive, KernelMode, FALSE, &Timeout);
+						if (st == STATUS_SUCCESS)
+						{
+							break;
+						}
+						else if (st == STATUS_TIMEOUT)
+						{
+							// continue;
+						}
+						else
+						{
+							ExRaiseStatus(st);
+						}
+					} while (true);
+				}
+				else
+				{
+					KeBugCheck(IRQL_NOT_LESS_OR_EQUAL);
+				}
 			}
 
 			void mutex::unlock()
 			{
-				#if defined(EA_PLATFORM_MICROSOFT)
-					LeaveCriticalSection((CRITICAL_SECTION*)mMutexBuffer);
-				#elif defined(EA_PLATFORM_POSIX)
-					pthread_mutex_unlock(&mMutex);
-				#endif
+				KeReleaseMutex(mMutex, FALSE);
 			}
 		#endif
 

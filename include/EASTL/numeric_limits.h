@@ -739,6 +739,7 @@ namespace eastl
 	#endif
 
 
+	/*
 	// numeric_limits<unsigned short>
 	template<>
 	struct numeric_limits<unsigned short>
@@ -796,6 +797,7 @@ namespace eastl
 		static EA_CONSTEXPR value_type denorm_min() 
 			{ return static_cast<value_type>(0); }
 	};
+	*/
 
 
 	// numeric_limits<signed short>

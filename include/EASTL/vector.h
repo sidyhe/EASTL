@@ -1410,7 +1410,7 @@ namespace eastl
 		mpEnd      = internalCapacityPtr();
 
 		typedef typename eastl::remove_const<T>::type non_const_value_type; // If T is a const type (e.g. const int) then we need to initialize it as if it were non-const.
-		eastl::uninitialized_fill_n_ptr<value_type, Integer>((non_const_value_type*)mpBegin, n, value);
+		eastl::uninitialized_fill_n_ptr<value_type, Integer>((non_const_value_type*)mpBegin, n, (value_type)value);
 	}
 
 
